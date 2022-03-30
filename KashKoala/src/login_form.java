@@ -1,23 +1,27 @@
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.HashMap;
+import java.util.regex.Pattern;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
- 
-import java.util.HashMap; 
-import java.util.regex.Pattern;
 
 
 public class login_form {
 	
 	
 	static HashMap<String, String> login_info = new HashMap<String, String>();
+	static HashMap<String, Integer> user_funds = new HashMap<String, Integer>();
+
+
 	static boolean logged_in = false;
+	static String logged_user = "";
 	
 	public static void create_login_popup() {
 		//Creates a popup form to login when the button is pressed
@@ -39,7 +43,8 @@ public class login_form {
         "Please Enter your Password:", null);
         if (login_info.containsKey(name) && login_info.get(name).equals(pass)) {
         	logged_in = true;
-        	///createAndShowHomeGUI();
+        	logged_user=name;
+        	createAndShowHomeGUI();
         	}
         
         //if the stored password does not equal the input, try again. After 3 attempts the user will be locked out of their acc.
@@ -121,6 +126,7 @@ public class login_form {
         
         if (information_valid==true){
         	login_info.put(name,pass);
+        	user_funds.put(name, money);
         }
 
 	}
@@ -129,9 +135,12 @@ public class login_form {
     public static void addComponentsToPane(Container pane) {
     	//adds the buttons to the frame
         pane.setLayout(new BoxLayout(pane, BoxLayout.Y_AXIS));
- 
+
+        
+        
         JButton button = new JButton("Login");
         button.setAlignmentX(Component.CENTER_ALIGNMENT);
+
         pane.add(button);
 
         button.addActionListener(new ActionListener() {
@@ -145,7 +154,8 @@ public class login_form {
         
         
         JButton button2 = new JButton("Register");
-        button.setAlignmentX(Component.CENTER_ALIGNMENT);
+        button2.setAlignmentX(Component.CENTER_ALIGNMENT);
+
         pane.add(button2);
 
         button2.addActionListener(new ActionListener() {
@@ -155,12 +165,49 @@ public class login_form {
                 create_registration_popup();
                 }
         });
+        
+    }
+        
+        
+    public static void addComponentsToPane2(Container pane) {
+    	//adds the buttons to the frame
+        pane.setLayout(new BoxLayout(pane, BoxLayout.Y_AXIS));
+ 
+        JButton button = new JButton("Display User Info");
+        button.setAlignmentX(Component.CENTER_ALIGNMENT);
+        pane.add(button);
+        
+        JButton button2 = new JButton("Logout");
+        button2.setAlignmentX(Component.CENTER_ALIGNMENT);
+        pane.add(button2);
+        
 
+        button.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                display_user_info();
+            }
+        });
+        
+        button2.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ///close the JFrame
+            	}
+        });
+        
+    }
+
+        
+        
+        
+       
         /*addAButton("Register", pane);
         addAButton("Button 3", pane);
         addAButton("Long-Named Button 4", pane);
         addAButton("5", pane);*/
-    }
     /*
     private static void addAButton(String text, Container container) {
         JButton button = new JButton(text);
@@ -169,11 +216,21 @@ public class login_form {
     }
 	*/
     
+    public static void display_user_info() {
+    	JFrame parent = new JFrame();
+
+    	int savings = user_funds.get(logged_user);
+    	JOptionPane.showMessageDialog(parent, "Username: " + logged_user + " Current Savings: " + savings);
+    	
+    }
     
     private static void createAndShowGUI() {
     	//creates the frame used for the form
         final JFrame frame = new JFrame("Login Form");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        
+        frame.getContentPane().setBackground(Color.BLUE);
+
         addComponentsToPane(frame.getContentPane());
  
         frame.setSize(200, 200);
@@ -185,7 +242,7 @@ public class login_form {
     private static void createAndShowHomeGUI() {
     	JFrame frame2 = new JFrame("Kash Koala Home");
     	frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    	
+    	addComponentsToPane2(frame2.getContentPane());
     	
     	frame2.setSize(600, 600);
         frame2.setLocationRelativeTo(null);
