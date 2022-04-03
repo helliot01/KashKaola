@@ -1,10 +1,18 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Container;
 import java.awt.GridLayout;
+import java.awt.List;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.lang.reflect.Array;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import javax.swing.BorderFactory;
@@ -24,9 +32,18 @@ public class backbone {
 	static JPanel panel;
 	static JPanel home;
 	
-	static HashMap<String, String> login_info = new HashMap<String, String>();
-	static HashMap<String, String> user_to_name = new HashMap<String, String>();
-
+		
+	
+	static Map<String, String> login_info = new HashMap<String, String>();
+	static Map<String, String> user_to_name = new HashMap<String, String>();
+	static Map<String, String> friendships = new HashMap<String, String>();
+	static Map<String, Integer> balances = new HashMap<String, Integer>();
+	
+	static Map<String, String[]> login_info2 = new HashMap<String, String[]>();
+	static String[] info_list = new String[3];	
+	
+	
+	
 	static boolean logged_in = false;
 	static String logged_user = "";
 
@@ -50,7 +67,12 @@ public class backbone {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                create_registration_popup();
+                try {
+					create_registration_popup();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
                 }
         });
 		
@@ -88,7 +110,17 @@ public class backbone {
 	}
 	
 	
+	///for testing:
 	
+	public static void add_test_cases() {
+		login_info.put("h", "h");
+		login_info.put("e", "e");
+		user_to_name.put("h", "h");
+		user_to_name.put("e", "e");
+		balances.put("h", 600);
+		balances.put("e", 0);
+
+	}
 	
 	public static void create_login_popup() {
 		//Creates a popup form to login when the button is pressed
@@ -143,7 +175,7 @@ public class backbone {
         
     }
 	
-	public static void create_registration_popup() {
+	public static void create_registration_popup() throws IOException {
 		//Creates a popup form to register when the button is pressed
 
 		boolean information_valid = true;
@@ -213,13 +245,79 @@ public class backbone {
 	        }
         }
         
-        //if the info is valid, it will get added to the dictionary and sotre the user/pass and user/firstname
+        //if the info is valid, it will get added to the dictionary and store the user/pass and user/firstname
         
         if (information_valid==true){
         	login_info.put(name,pass);
         	user_to_name.put(name,first_name);
+        	balances.put(name, 0);
+        	write_login_info(login_info);
+        	
+        	///testing one list versus a few
+        	/*
+        	info_list[0]=pass;
+        	info_list[1]=first_name;
+        	info_list[2]=Integer.toString(0);
+        	login_info2.put(name, info_list);
+        	System.out.println(login_info2.get(name)[0]);
+        	*/
         }
 
+	}
+	
+	//add friend function
+	public static void add_friend() {
+		JFrame parent = new JFrame();
+		String friend_name = JOptionPane.showInputDialog(parent,
+        		"Please Enter your Friends Username:", null);
+		if(friend_name.equals(logged_user)) {
+			JOptionPane.showMessageDialog(parent, "You Cannot Add Yourself");
+		}
+		//checks if the friendship pair is already in the friendships map
+		else if(login_info.containsKey(friend_name)) {
+			if(friendships.containsKey(logged_user) && friendships.get(logged_user).equals(friend_name)) {
+				JOptionPane.showMessageDialog(parent, "Friend Already Added!");
+			}
+			else {
+				JOptionPane.showMessageDialog(parent, "Friend Added Successfully!");
+				friendships.put(friend_name, logged_user);
+				friendships.put(logged_user, friend_name);
+			}
+		}
+		else {
+			JOptionPane.showMessageDialog(parent, "Username not found");
+		}
+
+	}
+	
+	//show the current users friendslist 
+	public static void show_friends() {
+		JFrame parent = new JFrame();
+		String friends = "Friends: ";
+		if(! friendships.containsKey(logged_user)) {
+			friends += "None";
+		}
+		else { 
+			//check the friendship map for each key,value pair. if key is logged_user, add value to friends String
+			for (Map.Entry<String,String> entry : friendships.entrySet())
+	            if (entry.getKey().equals(logged_user)){
+	            	friends += " " + entry.getValue();
+	            }
+		}
+		JOptionPane.showMessageDialog(parent, friends);
+
+	}
+	///FUNCTIONS FOR AFFECTING AND CHECKING BALANCE
+	
+	public static void check_balance() {
+		JFrame parent = new JFrame();
+		JOptionPane.showMessageDialog(parent, "Current Balance: " + (balances.get(logged_user)));
+	}
+	
+	
+	public static void add_to_balance() {
+		String depo = JOptionPane.showInputDialog("How Much Would You Like to Deposit?:");
+		balances.replace(logged_user, balances.get(logged_user), balances.get(logged_user)+Integer.parseInt(depo));
 	}
 	
 	public static void create_home_popup() {
@@ -237,7 +335,7 @@ public class backbone {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("placeholder");
+                check_balance();
             }
         });
 		
@@ -247,7 +345,7 @@ public class backbone {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("placeholder");
+                add_to_balance();
             }
         });
 		
@@ -261,6 +359,26 @@ public class backbone {
                 System.out.println("placeholder");
             }
         });
+		
+		
+		JButton button5 = new JButton("Add Friend");
+		button5.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				add_friend();
+			}
+		});
+		
+		
+		JButton button6 = new JButton("Friendslist");
+		button6.addActionListener(new ActionListener(){
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				show_friends();
+			}
+		});
+
+
 
 		
 		JButton button4 = new JButton("Logout");
@@ -282,6 +400,8 @@ public class backbone {
 		home.add(button);
 		home.add(button2);
 		home.add(button3);
+		home.add(button5);
+		home.add(button6);
 		home.add(button4);
 
 
@@ -299,9 +419,33 @@ public class backbone {
 	}
 	
 	
+	public static void write_login_info(Map<String, String> login_info2) throws IOException{
+		File file = new File("temp");
+        FileOutputStream f = new FileOutputStream(file);
+        ObjectOutputStream s = new ObjectOutputStream(f);
+        s.writeObject(login_info2);
+        s.close();
+
+	}
 	
-	public static void main(String[] args) {
+	public static Map<String,String> read_login_info() throws IOException, ClassNotFoundException{
+		File file = new File("temp");
+	    FileInputStream f = new FileInputStream(file);
+	    ObjectInputStream s = new ObjectInputStream(f);
+	    Map<String, String> fileObj2 = (HashMap<String, String>) s.readObject();
+	    s.close();
+
+		return fileObj2;
+	}
+
+	
+	
+	
+	
+	public static void main(String[] args) throws IOException, ClassNotFoundException {
     	new backbone();
+    	login_info = read_login_info();
+    	System.out.println(login_info);
 	}
 	
 	
