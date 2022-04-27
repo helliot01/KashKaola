@@ -16,3 +16,4 @@ we used maven to add the library as a dependency for our project.
 The program also stores user login info, friendslist, and portfolio information in three separate files.
 
 The majority of the code is included in the backbone file, and a custom tuple was created for the use of portfolio tracking.
+The project uses Java JFrames and JPanels for the UI and functionality.
