@@ -1,0 +1,78 @@
+TESTCASES:
+
+cases for testing registration: 
+
+test #1: attempt to register using a username that already exists in the system
+expected result: error messaging prompting the user to choose a different user
+
+test #2: attempt to enter two mismatching password during the password entry part of registration
+expected result: error messaging telling the user the passwords do not match
+
+test #3: attempt to set date of birth that would make the user under 18 years old
+expected result: error messaging telling the user they must be 18+ to use KashKoala
+
+test #4: attempt to enter current available savings >$500:
+expected result: error message telling the user they must have $500+ to use KashKoala
+
+
+
+
+cases for testing login: 
+
+test #1: attempt to login with a username not in the system
+expected result: error message telling the user that the entered username is not in the system
+
+test #2: attempt to login with an incorrect password
+expected result: error message telling the user that the password is wrong 
+additional result: after 3 false attempts, lock the user out of the system
+
+
+
+
+
+cases for testing the home screen: 
+
+test #1: attempt to withdraw more money than is currently in the users account
+expected result: error message telling the user they cannot withdraw more than they have
+
+test #2: attempting to add the logged user as their own friend
+expected result: error message telling the user they cannot add themselves
+
+test #3: attempt to add a nonexistent user as a friend
+expected result: error message telling the user the attempted friend is not in the system 
+
+test #4: attempt to send money from the logged user to themselves
+expected result: error message telling the user they can't send money to themselves
+
+test #5: attempt to send money to a user not on the logged users friends list
+expected result: error message telling the user that they can only send money to an added friend
+
+test #6: attempt to send more money than currently in the users balance
+expected result: error message telling the user they don't have enough money to send 
+
+
+
+
+cases for testing the portfolio screen:
+
+test #1: attempt to look up a stock not listed through the api
+expected result: error message telling the user the given ticker can not be found
+
+test #2: attempt to buy a stock not listed through the api
+expected result: error message telling the user the given ticker can not be found
+
+
+test #3: attempt to buy a stock for more than in current balance
+expected result: error message telling the user the cannot purchase that many shares
+
+test #4: attempt to sell a stock the user does not own 
+expected result: error message telling the user they don't own that stock
+
+test #5: attempt to sell more shares of a stock than currently owned
+expected result: error message telling the user they do not have enough shares
+
+
+
+
+
+

@@ -172,11 +172,19 @@ public class backbone implements Serializable {
 	    			JOptionPane.showMessageDialog(parent, 
 	    			"Too Many Invalid Attemps. Your Account Has Been Locked for 24 Hours.");
 	    		}
+	        	if(login_info2.get(name)[0].equals(pass)) {
+	        		logged_in = true;
+		        	logged_user=name;
+		        	frame.dispose();
+		        	panel.setVisible(false);
+		        	create_home_popup();
+		        	}
+
+	        	}
 	
 	        }
         }
         
-    }
 	
 	public static void create_registration_popup() throws IOException {
 		//Creates a popup form to register when the button is pressed
@@ -274,7 +282,8 @@ public class backbone implements Serializable {
 		String friend_name = JOptionPane.showInputDialog(parent,
         		"Please Enter your Friends Username:", null);
 		boolean friend_added = false;
-		
+		//if the user hits enter without entering text into the field nothing happens
+		if(friend_name.equals(""))return;
 		if(friend_name!=null) {
 			//if the user inputs their own username, you can't add yourself
 			if(friend_name.equals(logged_user)) {
@@ -352,6 +361,8 @@ public class backbone implements Serializable {
 		String friend_name = JOptionPane.showInputDialog(parent,
         		"Please Enter your Friends Username:", null);
 		boolean friend_found = false;
+		//if the user hits enter without entering text into the field nothing happens
+		if(friend_name.equals(""))return;
 		if(friend_name!=null) {
 			
 			if(friend_name.equals(logged_user)) {
@@ -369,6 +380,8 @@ public class backbone implements Serializable {
 						if(friendships.get(logged_user).get(x).equals(friend_name)) {
 							//we ask the user how much they would like to send
 							String amount_to_send = JOptionPane.showInputDialog(parent, "How Much Would you Like to Send?");
+							//if the user hits enter without entering text into the field nothing happens
+							if(amount_to_send.equals(""))return;
 							if(amount_to_send!=null) {
 								//if the amount being sent is more than the user has, they receive an error
 								if(Double.valueOf(login_info2.get(logged_user)[1])< Double.valueOf(amount_to_send)){
@@ -410,6 +423,7 @@ public class backbone implements Serializable {
 	
 	public static void add_to_balance() throws IOException {
 		String depo = JOptionPane.showInputDialog("How Much Would You Like to Deposit?:");
+		if(depo.equals("")) return;
 		if (depo!=null) { //note that the balance is stored as a string, so we must convert it to and from doubles while adding
 			login_info2.get(logged_user)[1]=Double.toString(Double.valueOf(login_info2.get(logged_user)[1])+Double.valueOf(depo));
 			write_login_info(login_info2);
@@ -419,6 +433,7 @@ public class backbone implements Serializable {
 		JFrame parent = new JFrame();
 
 		String withd = JOptionPane.showInputDialog("How Much Would You Like to Withdraw?:");
+		if(withd.equals("")) return;
 		if(withd!=null) {
 			//if the user attempts to withdraw more than they have, they receive an error
 			if (Double.valueOf(login_info2.get(logged_user)[1])<Double.valueOf(withd)) {
@@ -447,6 +462,7 @@ public class backbone implements Serializable {
 	public static void check_stock_price() throws IOException{
 		JFrame parent = new JFrame();
 		String ticker = JOptionPane.showInputDialog("Please Enter the Stock Ticker:");
+		if(ticker.equals("")) return;
 			if (ticker!=null) {
 				//uses YahooFinance api to retrieve stock, and then get the price
 				Stock stock = YahooFinance.get(ticker);
@@ -471,6 +487,7 @@ public class backbone implements Serializable {
 		
 		JFrame parent = new JFrame();
 		String ticker = JOptionPane.showInputDialog("Please Enter the Stock Ticker you Would Like to Purchase:");
+		if(ticker.equals("")) return;
 		if(ticker!=null) {
 			Stock stock = YahooFinance.get(ticker);
 			if(stock==null) {
@@ -482,7 +499,7 @@ public class backbone implements Serializable {
 				BigDecimal price = stock.getQuote().getPrice();
 				String ticker_name = stock.getName();
 				String shares_to_buy = JOptionPane.showInputDialog(parent, "The Current Price of " + ticker_name + " is " + price + ". You Current Balance is " + curr_bal + ". How Many Shares Would You Like to Buy?");
-				
+				if(shares_to_buy.equals(""))return;
 				if (shares_to_buy!=null) {
 					int int_shares = Integer.parseInt(shares_to_buy);
 					double pay = (int_shares * price.doubleValue());
@@ -540,6 +557,7 @@ public class backbone implements Serializable {
 		JFrame parent = new JFrame();
 		String ticker = JOptionPane.showInputDialog("Please Enter the Stock Ticker you Would Like to Sell:");
 		boolean stock_owned = false;
+		if(ticker.equals("")) return;
 		if(ticker!=null) {
 			Stock stock = YahooFinance.get(ticker);
 			if (stock==null) {
@@ -549,36 +567,42 @@ public class backbone implements Serializable {
 			else {
 				BigDecimal price = stock.getQuote().getPrice();
 				String ticker_name = stock.getName();
-
-				for(int x=0; x<portfolio_info.get(logged_user).size();x+=1) {
-					//we retrieve each tuple in the users portfolio, to check if they own the one they are attempting to sell
-					Tuple to_sell = portfolio_info.get(logged_user).get(x);
-					if(to_sell.getTicker().equals(ticker)) {
-						//if the desired ticker is found to match
-						String shares_to_sell = JOptionPane.showInputDialog(parent, "The Current Price of " + ticker_name + " is " + price + ". You Currently Own " + to_sell.getShares() + " Shares, And Purchased Them at " + to_sell.getPurchasedPrice() + " .How Many Shares Would You Like to Sell?");
-						if(shares_to_sell!=null) {
-							if(Integer.parseInt(shares_to_sell)>to_sell.getShares()) {
-								//if the user tries to sell more shares than they have
-								JOptionPane.showMessageDialog(parent, "You do Not Own This Many Shares");
-								break;
-							}
-							else {
-								stock_owned=true;
-								//calculate the total profit the user will get from selling the desired number of shares
-								double total_profit = Integer.parseInt(shares_to_sell) * price.doubleValue();
-								JOptionPane.showMessageDialog(parent, "You Have Successfully Sold " + shares_to_sell + " Shares, for a Total of " + total_profit + " . Your New Balance is " + (curr_bal + total_profit) + " .");
-								login_info2.get(logged_user)[1] = Double.toString(curr_bal + total_profit); //update the users balance
-								write_login_info(login_info2);
-								//if they are attempting the sell exactly the same number of shares that they own, we remove the tuple from their portfolio
-								if(Integer.parseInt(shares_to_sell)==to_sell.getShares()) {
-									portfolio_info.get(logged_user).remove(x);
-									write_tickers_owned(portfolio_info);
+				if(! portfolio_info.containsKey(logged_user)) {
+					JOptionPane.showMessageDialog(parent, "You Do Not Own Any Stocks Yet!");
+					stock_owned=true;
+				}
+				else {
+					for(int x=0; x<portfolio_info.get(logged_user).size();x+=1) {
+						//we retrieve each tuple in the users portfolio, to check if they own the one they are attempting to sell
+						Tuple to_sell = portfolio_info.get(logged_user).get(x);
+						if(to_sell.getTicker().equals(ticker)) {
+							//if the desired ticker is found to match
+							String shares_to_sell = JOptionPane.showInputDialog(parent, "The Current Price of " + ticker_name + " is " + price + ". You Currently Own " + to_sell.getShares() + " Shares, And Purchased Them at " + to_sell.getPurchasedPrice() + " .How Many Shares Would You Like to Sell?");
+							if(shares_to_sell.equals(""))return;
+							if(shares_to_sell!=null) {
+								if(Integer.parseInt(shares_to_sell)>to_sell.getShares()) {
+									//if the user tries to sell more shares than they have
+									JOptionPane.showMessageDialog(parent, "You do Not Own This Many Shares");
 									break;
 								}
-								//else we update the number of shares in their portfolio
 								else {
-									to_sell.sellShares(Integer.parseInt(shares_to_sell));
-									write_tickers_owned(portfolio_info);
+									stock_owned=true;
+									//calculate the total profit the user will get from selling the desired number of shares
+									double total_profit = Integer.parseInt(shares_to_sell) * price.doubleValue();
+									JOptionPane.showMessageDialog(parent, "You Have Successfully Sold " + shares_to_sell + " Shares, for a Total of " + total_profit + " . Your New Balance is " + (curr_bal + total_profit) + " .");
+									login_info2.get(logged_user)[1] = Double.toString(curr_bal + total_profit); //update the users balance
+									write_login_info(login_info2);
+									//if they are attempting the sell exactly the same number of shares that they own, we remove the tuple from their portfolio
+									if(Integer.parseInt(shares_to_sell)==to_sell.getShares()) {
+										portfolio_info.get(logged_user).remove(x);
+										write_tickers_owned(portfolio_info);
+										break;
+									}
+									//else we update the number of shares in their portfolio
+									else {
+										to_sell.sellShares(Integer.parseInt(shares_to_sell));
+										write_tickers_owned(portfolio_info);
+									}
 								}
 							}
 						}
@@ -601,31 +625,40 @@ public class backbone implements Serializable {
 		String portfolio_purchased_at = "Price Purchased At: ";
 		String portfolio_current = "Current Price: ";
 		String portfolio_change = "Change in Price: ";
+		String[] stocks_data = new String[5];
+
 		//the different strings allow us to format the text later on the JPanel
 		
-		for(int x=0; x<portfolio_info.get(logged_user).size();x+=1) {
-			Tuple t = portfolio_info.get(logged_user).get(x);
-			Stock stock = YahooFinance.get(t.getTicker());
-			BigDecimal current_price = stock.getQuote().getPrice();
-
-			
-			portfolio_names+=stock.getName() + ", ";
-			portfolio_shares+=t.getShares() + ", ";
-			portfolio_purchased_at+=t.getPurchasedPrice()+ ", ";
-			portfolio_current+=current_price+ ", ";
-			portfolio_change+=Double.toString(current_price.doubleValue()-t.getPurchasedPrice().doubleValue())+ ", ";
-
-			
+		if(! portfolio_info.containsKey(logged_user)) {
+			stocks_data[0]="You do not currently own any stocks.";
+			stocks_data[1]="";
+			stocks_data[2]="";
+			stocks_data[3]="";
+			stocks_data[4]="";
 		}
-		String[] stocks_data = new String[5];
-		stocks_data[0]=portfolio_names;
-		stocks_data[1]=portfolio_shares;
-		stocks_data[2]=portfolio_purchased_at;
-		stocks_data[3]=portfolio_current;
-		stocks_data[4]=portfolio_change;
-		//we add the strings to a list and return it so it can be easily accessed
+		else {
+			for(int x=0; x<portfolio_info.get(logged_user).size();x+=1) {
+				Tuple t = portfolio_info.get(logged_user).get(x);
+				Stock stock = YahooFinance.get(t.getTicker());
+				BigDecimal current_price = stock.getQuote().getPrice();
+	
+				
+				portfolio_names+=stock.getName() + ", ";
+				portfolio_shares+=t.getShares() + ", ";
+				portfolio_purchased_at+=t.getPurchasedPrice()+ ", ";
+				portfolio_current+=current_price+ ", ";
+				portfolio_change+=Double.toString(current_price.doubleValue()-t.getPurchasedPrice().doubleValue())+ ", ";
+	
+				
+			}
+			stocks_data[0]=portfolio_names;
+			stocks_data[1]=portfolio_shares;
+			stocks_data[2]=portfolio_purchased_at;
+			stocks_data[3]=portfolio_current;
+			stocks_data[4]=portfolio_change;
+			//we add the strings to a list and return it so it can be easily accessed
+		}
 		return stocks_data;
-
 		
 
 	}
